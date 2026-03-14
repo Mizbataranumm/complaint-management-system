@@ -1,6 +1,6 @@
 // js/app.js - Core Application Logic
 
-const API = 'http://localhost:3000/api';
+const API_BASE = "https://complaint-api-ukmi.onrender.com";
 let currentUser = null;
 let allComplaints = [];
 let currentPage = 1;
