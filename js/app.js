@@ -90,20 +90,52 @@ async function loadPage(pageId) {
 
 // ─── Dashboard ────────────────────────────────────────────────────────
 async function loadDashboard() {
-  const data = await apiFetch('/analytics');
-  if (!data.success) return;
+  // Students and staff see only their own stats
+  if (currentUser.role === 'student' || currentUser.role === 'staff' || currentUser.role === 'maintenance') {
+    const myData = await apiFetch(`/complaints?userId=${currentUser.id}&limit=100`);
+    const complaints = myData.complaints || [];
 
-  const s = data.stats;
-  document.getElementById('stat-total').textContent = s.total;
-  document.getElementById('stat-open').textContent = s.open;
-  document.getElementById('stat-progress').textContent = s.inProgress;
-  document.getElementById('stat-resolved').textContent = s.resolvedToday;
-  document.getElementById('stat-escalated').textContent = s.escalated;
-  document.getElementById('stat-avg').textContent = s.avgResolutionHours + 'h';
+    const total = complaints.length;
+    const open = complaints.filter(c => ['Submitted','Under Review','Assigned'].includes(c.status)).length;
+    const inProgress = complaints.filter(c => c.status === 'In Progress').length;
+    const resolved = complaints.filter(c => c.status === 'Resolved' || c.status === 'Closed').length;
+    const escalated = complaints.filter(c => c.escalated).length;
 
-  renderDashboardCharts(data);
-  loadRecentComplaints();
-  loadActivityLogs();
+    document.getElementById('stat-total').textContent = total;
+    document.getElementById('stat-open').textContent = open;
+    document.getElementById('stat-progress').textContent = inProgress;
+    document.getElementById('stat-resolved').textContent = resolved;
+    document.getElementById('stat-escalated').textContent = escalated;
+    document.getElementById('stat-avg').textContent = '—';
+
+    // Show empty state message if no complaints
+    if (total === 0) {
+      document.getElementById('recent-tbody').innerHTML = `
+        <tr><td colspan="6" style="text-align:center;padding:32px;color:#94a3b8;">
+          <div style="font-size:32px;margin-bottom:8px;">📭</div>
+          <div style="font-weight:600;">No complaints yet</div>
+          <div style="font-size:12px;margin-top:4px;">Click "+ New Complaint" to submit your first complaint</div>
+        </td></tr>`;
+    } else {
+      loadRecentComplaints();
+    }
+    loadActivityLogs();
+
+  } else {
+    // Admin and HOD see all stats
+    const data = await apiFetch('/analytics');
+    if (!data.success) return;
+    const s = data.stats;
+    document.getElementById('stat-total').textContent = s.total;
+    document.getElementById('stat-open').textContent = s.open;
+    document.getElementById('stat-progress').textContent = s.inProgress;
+    document.getElementById('stat-resolved').textContent = s.resolvedToday;
+    document.getElementById('stat-escalated').textContent = s.escalated;
+    document.getElementById('stat-avg').textContent = s.avgResolutionHours + 'h';
+    renderDashboardCharts(data);
+    loadRecentComplaints();
+    loadActivityLogs();
+  }
 }
 
 async function loadRecentComplaints() {
