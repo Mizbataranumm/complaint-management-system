@@ -1,127 +1,82 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login – College Complaint Management System</title>
-  <link rel="stylesheet" href="css/style.css">
-</head>
-<body class="login-page">
+<script>
 
-  <div class="login-container">
-    <div class="login-card">
-      <div class="login-header">
-        <div class="login-logo">🏛️</div>
-        <h1>College Complaint<br>Management System</h1>
-        <p>ABC Engineering College · ERP Portal</p>
-      </div>
+const API_BASE = "https://complaint-api-ukmi.onrender.com";
 
-      <div id="error-msg" class="alert alert-error hidden" role="alert">
-        <span>⚠️</span>
-        <span id="error-text">Invalid email or password. Please try again.</span>
-      </div>
+async function doLogin() {
+  var email    = document.getElementById('email').value.trim();
+  var password = document.getElementById('password').value.trim();
+  var role     = document.getElementById('role').value;
+  var btn      = document.getElementById('login-btn');
+  var errMsg   = document.getElementById('error-msg');
+  var errText  = document.getElementById('error-text');
 
-      <div class="login-form">
-        <div class="form-group">
-          <label for="email">Email Address</label>
-          <input type="text" id="email" placeholder="your@college.edu">
-        </div>
+  errMsg.classList.add('hidden');
 
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input type="password" id="password" placeholder="Enter your password">
-        </div>
+  if (!email || email.indexOf('@') === -1) {
+    errText.textContent = 'Please enter a valid email address.';
+    errMsg.classList.remove('hidden');
+    return;
+  }
 
-        <div class="form-group">
-          <label for="role">Login As</label>
-          <select id="role">
-            <option value="">Select your role</option>
-            <option value="student">Student</option>
-            <option value="staff">Staff</option>
-            <option value="hod">Head of Department (HOD)</option>
-            <option value="admin">Complaint Admin</option>
-            <option value="maintenance">Maintenance Staff</option>
-          </select>
-        </div>
+  if (!password) {
+    errText.textContent = 'Password is required.';
+    errMsg.classList.remove('hidden');
+    return;
+  }
 
-        <button type="button" class="btn btn-primary btn-full" id="login-btn" onclick="doLogin()">
-          🔐 Sign In
-        </button>
-      </div>
+  if (!role) {
+    errText.textContent = 'Please select your role.';
+    errMsg.classList.remove('hidden');
+    return;
+  }
 
-      <div class="demo-info">
-        <strong>🧪 Demo Credentials</strong>
-        <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px;font-size:12px;">
-          <div><strong>Admin:</strong> admin@college.edu / Admin@123</div>
-          <div><strong>Student:</strong> student@college.edu / Student@123</div>
-          <div><strong>HOD:</strong> hod@college.edu / Hod@123</div>
-          <div><strong>Staff:</strong> staff@college.edu / Staff@123</div>
-        </div>
-      </div>
-    </div>
-  </div>
+  btn.textContent = 'Signing in...';
+  btn.disabled = true;
 
-  <script>
-    async function doLogin() {
-      var email    = document.getElementById('email').value.trim();
-      var password = document.getElementById('password').value.trim();
-      var role     = document.getElementById('role').value;
-      var btn      = document.getElementById('login-btn');
-      var errMsg   = document.getElementById('error-msg');
-      var errText  = document.getElementById('error-text');
+  try {
 
-      errMsg.classList.add('hidden');
+    var response = await fetch(API_BASE + "/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: email,
+        password: password,
+        role: role
+      })
+    });
 
-      if (!email || email.indexOf('@') === -1) {
-        errText.textContent = 'Please enter a valid email address.';
-        errMsg.classList.remove('hidden');
-        return;
-      }
-      if (!password) {
-        errText.textContent = 'Password is required.';
-        errMsg.classList.remove('hidden');
-        return;
-      }
-      if (!role) {
-        errText.textContent = 'Please select your role.';
-        errMsg.classList.remove('hidden');
-        return;
-      }
+    var data = await response.json();
 
-      btn.textContent = 'Signing in...';
-      btn.disabled = true;
+    if (data.success) {
 
-      try {
-        var response = await fetch('http://localhost:3000/api/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: email, password: password, role: role })
-        });
+      sessionStorage.setItem("cms_user", JSON.stringify(data.user));
 
-        var data = await response.json();
+      // Redirect to dashboard
+      window.location.href = "dashboard.html";
 
-        if (data.success) {
-          sessionStorage.setItem('cms_user', JSON.stringify(data.user));
-          window.location.href = 'http://localhost:3000/dashboard.html';
-        } else {
-          errText.textContent = data.message || 'Invalid email or password. Please try again.';
-          errMsg.classList.remove('hidden');
-          btn.textContent = '🔐 Sign In';
-          btn.disabled = false;
-        }
+    } else {
 
-      } catch (err) {
-        errText.textContent = 'Cannot connect to server. Make sure: node backend/server.js is running in CMD.';
-        errMsg.classList.remove('hidden');
-        btn.textContent = '🔐 Sign In';
-        btn.disabled = false;
-      }
+      errText.textContent = data.message || "Invalid login.";
+      errMsg.classList.remove("hidden");
+
+      btn.textContent = "🔐 Sign In";
+      btn.disabled = false;
+
     }
 
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') doLogin();
-    });
-  </script>
+  } catch (err) {
 
-</body>
-</html>
+    errText.textContent = "Cannot connect to server.";
+    errMsg.classList.remove("hidden");
+
+    btn.textContent = "🔐 Sign In";
+    btn.disabled = false;
+
+  }
+}
+
+document.addEventListener("keydown", function(e){
+  if(e.key === "Enter") doLogin();
+});
+
+</script>
