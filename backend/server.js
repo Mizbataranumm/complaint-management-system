@@ -448,15 +448,13 @@ const checkEscalations = async () => {
 setInterval(checkEscalations, 30 * 60 * 1000);
 
 // ─── Serve Frontend ───────────────────────────────────────────────────────────
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'login.html'));
+app.get("/", (req, res) => {
+  res.sendFile(path.resolve(__dirname, "../login.html"));
 });
 
-app.get('*', (req, res) => {
-  const file = req.path.replace('/', '') || 'login.html';
-  const filePath = path.join(__dirname, '..', file);
-  if (fs.existsSync(filePath)) res.sendFile(filePath);
-  else res.sendFile(path.join(__dirname, '..', 'login.html'));
+// Serve login page
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "..", "login.html"));
 });
 
 // ─── Start Server ─────────────────────────────────────────────────────────────
