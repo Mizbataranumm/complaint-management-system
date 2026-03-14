@@ -1,0 +1,122 @@
+[
+  {
+    "id": "LOG1773471539908",
+    "action": "Auto-escalated complaint CMP1005 to Admin (48h+)",
+    "user": "System",
+    "role": "system",
+    "timestamp": "2026-03-14T06:58:59.908Z",
+    "complaintId": "CMP1005"
+  },
+  {
+    "id": "LOG1773471539907",
+    "action": "Auto-escalated complaint CMP1004 to Admin (48h+)",
+    "user": "System",
+    "role": "system",
+    "timestamp": "2026-03-14T06:58:59.907Z",
+    "complaintId": "CMP1004"
+  },
+  {
+    "id": "LOG1773471539906",
+    "action": "Auto-escalated complaint CMP1002 to Admin (48h+)",
+    "user": "System",
+    "role": "system",
+    "timestamp": "2026-03-14T06:58:59.906Z",
+    "complaintId": "CMP1002"
+  },
+  {
+    "id": "LOG1773471539904",
+    "action": "Auto-escalated complaint CMP1001 to Admin (48h+)",
+    "user": "System",
+    "role": "system",
+    "timestamp": "2026-03-14T06:58:59.904Z",
+    "complaintId": "CMP1001"
+  },
+  {
+    "id": "LOG1773469456968",
+    "action": "User logged in",
+    "user": "Dr. Priya Nair",
+    "role": "hod",
+    "timestamp": "2026-03-14T06:24:16.968Z",
+    "complaintId": null
+  },
+  {
+    "id": "LOG1773469403430",
+    "action": "User logged in",
+    "user": "Admin User",
+    "role": "admin",
+    "timestamp": "2026-03-14T06:23:23.430Z",
+    "complaintId": null
+  },
+  {
+    "id": "LOG1773468986914",
+    "action": "Submitted complaint CMP1009: Washroom Problem",
+    "user": "Rahul Sharma",
+    "role": "student",
+    "timestamp": "2026-03-14T06:16:26.914Z",
+    "complaintId": "CMP1009"
+  },
+  {
+    "id": "LOG1773468736812",
+    "action": "User logged in",
+    "user": "Rahul Sharma",
+    "role": "student",
+    "timestamp": "2026-03-14T06:12:16.812Z",
+    "complaintId": null
+  },
+  {
+    "id": "LOG1773468613084",
+    "action": "User logged in",
+    "user": "Admin User",
+    "role": "admin",
+    "timestamp": "2026-03-14T06:10:13.084Z",
+    "complaintId": null
+  },
+  {
+    "id": "LOG001",
+    "action": "Student submitted complaint CMP1001",
+    "user": "Rahul Sharma",
+    "role": "student",
+    "timestamp": "2024-01-15T10:30:00Z",
+    "complaintId": "CMP1001"
+  },
+  {
+    "id": "LOG002",
+    "action": "Admin assigned CMP1002 to IT Department",
+    "user": "Admin User",
+    "role": "admin",
+    "timestamp": "2024-01-15T08:00:00Z",
+    "complaintId": "CMP1002"
+  },
+  {
+    "id": "LOG003",
+    "action": "Maintenance updated status of CMP1001 to In Progress",
+    "user": "Mohan Das",
+    "role": "maintenance",
+    "timestamp": "2024-01-16T09:00:00Z",
+    "complaintId": "CMP1001"
+  },
+  {
+    "id": "LOG004",
+    "action": "Complaint CMP1003 resolved by Maintenance",
+    "user": "Mohan Das",
+    "role": "maintenance",
+    "timestamp": "2024-01-12T14:00:00Z",
+    "complaintId": "CMP1003"
+  },
+  {
+    "id": "LOG005",
+    "action": "CMP1008 escalated to HOD due to safety risk",
+    "user": "System",
+    "role": "system",
+    "timestamp": "2024-01-17T08:00:00Z",
+    "complaintId": "CMP1008"
+  },
+  {
+    "id": "LOG006",
+    "action": "Student submitted feedback for CMP1006",
+    "user": "Rahul Sharma",
+    "role": "student",
+    "timestamp": "2024-01-08T17:00:00Z",
+    "complaintId": "CMP1006"
+  }
+]

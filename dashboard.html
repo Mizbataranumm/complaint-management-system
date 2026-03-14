@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard – College CMS</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<!-- Toast Container -->
+<div id="toast-container" class="toast-container"></div>
+
+<!-- Complaint Detail Modal -->
+<div id="complaint-modal" class="modal-overlay hidden">
+  <div class="modal" id="modal-content"></div>
+</div>
+
+<!-- Feedback Modal -->
+<div id="feedback-modal" class="modal-overlay hidden">
+  <div class="modal" style="max-width:480px" id="feedback-modal-content"></div>
+</div>
+
+<div class="app-layout">
+
+  <!-- ── Sidebar ──────────────────────────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-logo">
+        <div class="brand-icon">🏛️</div>
+        <div class="brand-text">
+          <h2>College CMS</h2>
+          <span>Complaint Portal</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="sidebar-user-info">
+        <div class="user-avatar" id="sidebar-avatar">A</div>
+        <div class="user-details">
+          <strong id="sidebar-user-name">Loading...</strong>
+          <span class="user-role-badge" id="sidebar-user-role">role</span>
+        </div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-section-title">Main</div>
+        <div class="nav-item" data-page="dashboard">
+          <span class="nav-icon">📊</span> Dashboard
+        </div>
+        <div class="nav-item" data-page="submit">
+          <span class="nav-icon">✏️</span> Submit Complaint
+        </div>
+        <div class="nav-item" data-page="mycomplaints">
+          <span class="nav-icon">📋</span> My Complaints
+        </div>
+      </div>
+
+      <div class="nav-section" data-admin-only>
+        <div class="nav-section-title">Administration</div>
+        <div class="nav-item" data-page="complaints" data-admin-only>
+          <span class="nav-icon">🗂️</span> All Complaints
+        </div>
+        <div class="nav-item" data-page="analytics" data-admin-only>
+          <span class="nav-icon">📈</span> Analytics
+        </div>
+        <div class="nav-item" data-page="reports" data-admin-only>
+          <span class="nav-icon">📄</span> Reports
+        </div>
+        <div class="nav-item" data-page="logs" data-admin-only>
+          <span class="nav-icon">📝</span> Activity Logs
+        </div>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Account</div>
+        <div class="nav-item" data-page="settings">
+          <span class="nav-icon">⚙️</span> Settings
+        </div>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="logout-btn" id="logout-btn">
+        <span>🚪</span> Logout
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── Main Content ─────────────────────────────────────────────── -->
+  <main class="main-content">
+
+    <!-- Top Header -->
+    <header class="top-header">
+      <div class="header-left">
+        <h1 id="header-title">Dashboard</h1>
+        <p id="header-sub">Overview & Statistics</p>
+      </div>
+      <div class="header-right">
+        <div class="header-time" id="header-clock">--:--:--</div>
+        <button class="btn btn-primary btn-sm" onclick="navigateTo('submit')">+ New Complaint</button>
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <div class="page-content">
+
+      <!-- ────────────────────────── DASHBOARD PAGE ───────────────────── -->
+      <div class="page" id="page-dashboard">
+
+        <!-- Stat Cards -->
+        <div class="stats-grid">
+          <div class="stat-card blue">
+            <div class="stat-icon">📊</div>
+            <div class="stat-value" id="stat-total">—</div>
+            <div class="stat-label">Total Complaints</div>
+            <div class="stat-sub">All time</div>
+          </div>
+          <div class="stat-card orange">
+            <div class="stat-icon">🔓</div>
+            <div class="stat-value" id="stat-open">—</div>
+            <div class="stat-label">Open Complaints</div>
+            <div class="stat-sub">Needs attention</div>
+          </div>
+          <div class="stat-card purple">
+            <div class="stat-icon">⚙️</div>
+            <div class="stat-value" id="stat-progress">—</div>
+            <div class="stat-label">In Progress</div>
+            <div class="stat-sub">Being resolved</div>
+          </div>
+          <div class="stat-card green">
+            <div class="stat-icon">✅</div>
+            <div class="stat-value" id="stat-resolved">—</div>
+            <div class="stat-label">Resolved Today</div>
+            <div class="stat-sub">Today's count</div>
+          </div>
+          <div class="stat-card red">
+            <div class="stat-icon">⚠️</div>
+            <div class="stat-value" id="stat-escalated">—</div>
+            <div class="stat-label">Escalated</div>
+            <div class="stat-sub">Needs urgent action</div>
+          </div>
+          <div class="stat-card cyan">
+            <div class="stat-icon">⏱️</div>
+            <div class="stat-value" id="stat-avg">—</div>
+            <div class="stat-label">Avg Resolution</div>
+            <div class="stat-sub">Average time</div>
+          </div>
+        </div>
+
+        <!-- Charts Row 1 -->
+        <div class="grid-2 mb-24">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">📦 Category Distribution</div>
+            </div>
+            <div class="card-body">
+              <div class="chart-container">
+                <canvas id="category-pie-chart"></canvas>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">📊 Status Overview</div>
+            </div>
+            <div class="card-body">
+              <div class="chart-container">
+                <canvas id="status-doughnut-chart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts Row 2 -->
+        <div class="grid-2 mb-24">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">🏢 Complaints by Department</div>
+            </div>
+            <div class="card-body">
+              <div class="chart-container">
+                <canvas id="dept-bar-chart"></canvas>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">📈 Monthly Trend</div>
+            </div>
+            <div class="card-body">
+              <div class="chart-container">
+                <canvas id="monthly-line-chart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Complaints & Activity -->
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">🕐 Recent Complaints</div>
+              <button class="btn btn-outline btn-sm" onclick="navigateTo('complaints')">View All</button>
+            </div>
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th><th>Title</th><th>Category</th>
+                    <th>Priority</th><th>Status</th><th>Date</th>
+                  </tr>
+                </thead>
+                <tbody id="recent-tbody">
+                  <tr><td colspan="6" class="text-center text-muted" style="padding:24px">Loading...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">📝 Activity Log</div>
+              <button class="btn btn-outline btn-sm" onclick="navigateTo('logs')">View All</button>
+            </div>
+            <div class="card-body" style="padding:0 20px">
+              <div class="log-list" id="activity-log-list">
+                <div class="text-center text-muted" style="padding:24px">Loading...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ───────────────────── SUBMIT COMPLAINT PAGE ──────────────────── -->
+      <div class="page" id="page-submit">
+        <div class="card" style="max-width:760px;margin:0 auto">
+          <div class="card-header">
+            <div class="card-title">✏️ Submit New Complaint</div>
+          </div>
+          <div class="card-body">
+            <form id="complaint-form" novalidate>
+              <div class="form-grid">
+
+                <div class="form-group form-full">
+                  <label class="form-label">Complaint Title <span class="required">*</span></label>
+                  <input type="text" name="title" class="form-control" placeholder="Brief description of the issue (min. 5 characters)" required minlength="5">
+                </div>
+
+                <div class="form-group form-full">
+                  <label class="form-label">Complaint Description <span class="required">*</span></label>
+                  <textarea name="description" class="form-control" placeholder="Provide detailed information about the issue, when it started, how it's affecting you..." required style="min-height:120px"></textarea>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Category <span class="required">*</span></label>
+                  <select name="category" class="form-control" required>
+                    <option value="">Select Category</option>
+                    <option>Infrastructure</option>
+                    <option>Electricity</option>
+                    <option>Water Supply</option>
+                    <option>Internet / WiFi</option>
+                    <option>Laboratory Equipment</option>
+                    <option>Hostel Issues</option>
+                    <option>Cleanliness</option>
+                    <option>Furniture</option>
+                    <option>Safety</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Location <span class="required">*</span></label>
+                  <select name="location" class="form-control" required>
+                    <option value="">Select Location</option>
+                    <option>Hostel</option>
+                    <option>Laboratory</option>
+                    <option>Classroom</option>
+                    <option>Library</option>
+                    <option>Campus</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Priority Level <span class="required">*</span></label>
+                  <select name="priority" class="form-control" required>
+                    <option value="">Select Priority</option>
+                    <option value="Low">🟢 Low – Minor inconvenience</option>
+                    <option value="Medium">🟡 Medium – Affecting work</option>
+                    <option value="High">🟠 High – Major disruption</option>
+                    <option value="Critical">🔴 Critical – Safety/Emergency</option>
+                  </select>
+                </div>
+
+                <!-- ERP Optional Fields -->
+                <div class="form-group">
+                  <label class="form-label">Asset ID <span style="color:var(--text-muted);font-weight:400">(Optional)</span></label>
+                  <input type="text" name="asset_id" class="form-control" placeholder="e.g. LAB3-AC-001">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Lab Equipment ID <span style="color:var(--text-muted);font-weight:400">(Optional)</span></label>
+                  <input type="text" name="lab_equipment_id" class="form-control" placeholder="e.g. PROJ-SH-01">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Hostel Room ID <span style="color:var(--text-muted);font-weight:400">(Optional)</span></label>
+                  <input type="text" name="hostel_room_id" class="form-control" placeholder="e.g. BLOCK-A-101">
+                </div>
+
+                <div class="form-group form-full">
+                  <label class="form-label">Upload Proof <span style="color:var(--text-muted);font-weight:400">(Optional – Image, PDF, or Video)</span></label>
+                  <div class="file-upload-area" onclick="document.getElementById('attachment').click()">
+                    <div class="file-upload-icon">📎</div>
+                    <div class="file-upload-text">Click to upload or drag & drop</div>
+                    <div class="file-upload-hint">Supports: JPG, PNG, PDF, MP4 · Max 10MB</div>
+                    <div id="file-name-display" style="margin-top:8px;font-size:12px;color:var(--primary);font-weight:600"></div>
+                  </div>
+                  <input type="file" id="attachment" name="attachment" accept="image/*,.pdf,video/mp4" style="display:none">
+                </div>
+
+              </div>
+
+              <div style="margin-top:24px;display:flex;gap:12px;justify-content:flex-end">
+                <button type="reset" class="btn btn-outline">Reset</button>
+                <button type="submit" class="btn btn-primary" id="submit-btn">
+                  📤 Submit Complaint
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- ───────────────────── MY COMPLAINTS PAGE ─────────────────────── -->
+      <div class="page" id="page-mycomplaints">
+        <div id="my-complaints-list">
+          <div class="text-center text-muted" style="padding:48px">Loading your complaints...</div>
+        </div>
+      </div>
+
+      <!-- ───────────────────── ALL COMPLAINTS PAGE (Admin) ────────────── -->
+      <div class="page" id="page-complaints">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">🗂️ All Complaints</div>
+            <button class="btn btn-outline btn-sm" onclick="loadComplaintsTable()">🔄 Refresh</button>
+          </div>
+
+          <div class="filters-bar">
+            <input type="text" id="f-search" class="filter-input filter-search" placeholder="🔍 Search by ID, title or name...">
+            <select id="f-status" class="filter-input">
+              <option value="">All Statuses</option>
+              <option>Submitted</option><option>Under Review</option>
+              <option>Assigned</option><option>In Progress</option>
+              <option>Resolved</option><option>Closed</option>
+              <option>Rejected</option><option>Escalated</option>
+            </select>
+            <select id="f-category" class="filter-input">
+              <option value="">All Categories</option>
+              <option>Infrastructure</option><option>Electricity</option>
+              <option>Water Supply</option><option>Internet / WiFi</option>
+              <option>Laboratory Equipment</option><option>Hostel Issues</option>
+              <option>Cleanliness</option><option>Furniture</option>
+              <option>Safety</option><option>Other</option>
+            </select>
+            <select id="f-dept" class="filter-input">
+              <option value="">All Departments</option>
+              <option>Maintenance</option><option>IT Department</option>
+              <option>Hostel Management</option><option>Lab Technicians</option>
+              <option>Electrical Department</option><option>Campus Administration</option>
+            </select>
+          </div>
+
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Complaint ID</th><th>Title</th><th>Category</th>
+                  <th>Location</th><th>Submitted By</th><th>Role</th>
+                  <th>Priority</th><th>Status</th><th>Assigned To</th>
+                  <th>Submitted</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="complaints-tbody">
+                <tr><td colspan="11" class="text-center text-muted" style="padding:32px">Loading complaints...</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="pagination" id="complaints-pagination"></div>
+        </div>
+      </div>
+
+      <!-- ───────────────────── ANALYTICS PAGE ─────────────────────────── -->
+      <div class="page" id="page-analytics">
+        <div class="grid-2 mb-24">
+          <div class="card">
+            <div class="card-header"><div class="card-title">🍕 Category Distribution</div></div>
+            <div class="card-body"><div class="chart-container tall"><canvas id="analytics-pie-chart"></canvas></div></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">📊 Complaints by Department</div></div>
+            <div class="card-body"><div class="chart-container tall"><canvas id="analytics-bar-chart"></canvas></div></div>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header"><div class="card-title">📈 Monthly Complaint Trends</div></div>
+            <div class="card-body"><div class="chart-container tall"><canvas id="analytics-line-chart"></canvas></div></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">🎯 Complaints by Priority</div></div>
+            <div class="card-body"><div class="chart-container tall"><canvas id="analytics-priority-chart"></canvas></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ───────────────────── REPORTS PAGE ───────────────────────────── -->
+      <div class="page" id="page-reports">
+        <div class="card mb-24" id="reports-card">
+          <div class="card-header">
+            <div class="card-title">📄 Monthly Report</div>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-outline btn-sm" onclick="loadReports()">🔄 Refresh</button>
+              <button class="btn btn-primary btn-sm" onclick="downloadReport()">⬇️ Download</button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div style="margin-bottom:16px">
+              <span style="font-size:13px;color:var(--text-muted)">Period: </span>
+              <span id="report-period" style="font-weight:700;color:var(--primary)">—</span>
+              <span style="margin-left:20px;font-size:13px;color:var(--text-muted)">Total: </span>
+              <span id="report-total" style="font-weight:700">—</span>
+            </div>
+            <div class="grid-2">
+              <div>
+                <div style="font-weight:700;margin-bottom:12px;font-size:14px">📊 By Status</div>
+                <div id="report-status"></div>
+              </div>
+              <div>
+                <div style="font-weight:700;margin-bottom:12px;font-size:14px">📦 By Category</div>
+                <div id="report-category"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header"><div class="card-title">📊 Department Performance</div></div>
+            <div class="card-body">
+              <div style="display:flex;flex-direction:column;gap:12px" id="dept-performance">
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:var(--surface2);border-radius:8px">
+                  <span style="font-weight:600">Maintenance</span><span class="badge badge-resolved">4 resolved</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:var(--surface2);border-radius:8px">
+                  <span style="font-weight:600">IT Department</span><span class="badge badge-progress">1 in progress</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:var(--surface2);border-radius:8px">
+                  <span style="font-weight:600">Hostel Management</span><span class="badge badge-resolved">2 resolved</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:var(--surface2);border-radius:8px">
+                  <span style="font-weight:600">Lab Technicians</span><span class="badge badge-progress">1 in progress</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">⚠️ Pending Complaints</div></div>
+            <div class="card-body">
+              <div style="font-size:13px;color:var(--text-secondary);margin-bottom:12px">Complaints pending resolution</div>
+              <div id="pending-list">
+                <div style="text-align:center;padding:20px;color:var(--text-muted)">Click refresh to load pending complaints</div>
+              </div>
+              <button class="btn btn-outline btn-sm mt-4" onclick="loadPendingReport()">Load Pending</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ───────────────────── LOGS PAGE ──────────────────────────────── -->
+      <div class="page" id="page-logs">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📝 Activity Logs</div>
+            <button class="btn btn-outline btn-sm" onclick="loadLogs()">🔄 Refresh</button>
+          </div>
+          <div class="card-body">
+            <div class="log-list" id="logs-list">
+              <div class="text-center text-muted" style="padding:24px">Loading logs...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ───────────────────── SETTINGS PAGE ──────────────────────────── -->
+      <div class="page" id="page-settings">
+        <div class="card" style="max-width:600px;margin:0 auto">
+          <div class="card-header"><div class="card-title">⚙️ Settings</div></div>
+          <div class="card-body">
+            <div style="display:flex;flex-direction:column;gap:20px">
+
+              <div style="padding:16px;background:var(--surface2);border-radius:10px;border:1px solid var(--border)">
+                <div style="font-weight:700;margin-bottom:12px">👤 Account Information</div>
+                <div class="form-grid" style="gap:12px">
+                  <div class="form-group">
+                    <label class="form-label">Name</label>
+                    <input type="text" class="form-control" id="s-name" readonly>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-control" id="s-email" readonly>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Role</label>
+                    <input type="text" class="form-control" id="s-role" readonly>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Department</label>
+                    <input type="text" class="form-control" id="s-dept" readonly>
+                  </div>
+                </div>
+              </div>
+
+              <div style="padding:16px;background:var(--surface2);border-radius:10px;border:1px solid var(--border)">
+                <div style="font-weight:700;margin-bottom:12px">🔔 Notification Preferences</div>
+                <div style="display:flex;flex-direction:column;gap:10px;font-size:14px">
+                  <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+                    <input type="checkbox" checked> Email on complaint submission
+                  </label>
+                  <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+                    <input type="checkbox" checked> Email on status update
+                  </label>
+                  <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+                    <input type="checkbox" checked> Email on complaint resolution
+                  </label>
+                </div>
+              </div>
+
+              <div style="padding:16px;background:var(--surface2);border-radius:10px;border:1px solid var(--border)">
+                <div style="font-weight:700;margin-bottom:8px">🖥️ System Information</div>
+                <div style="font-size:13px;color:var(--text-secondary);display:flex;flex-direction:column;gap:6px">
+                  <div>Version: <strong>1.0.0</strong></div>
+                  <div>Server: <strong>Node.js + Express</strong></div>
+                  <div>Database: <strong>JSON File Store (MongoDB ready)</strong></div>
+                  <div>College: <strong>ABC Engineering College</strong></div>
+                </div>
+              </div>
+
+              <button class="btn btn-danger" onclick="logout()">🚪 Logout from System</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /page-content -->
+  </main>
+</div>
+
+<script src="js/charts.js"></script>
+<script src="js/app.js"></script>
+<script>
+// Additional page-specific functions
+
+async function loadPendingReport() {
+  const data = await apiFetch('/complaints?status=Submitted&limit=10');
+  if (!data.success) return;
+  const el = document.getElementById('pending-list');
+  if (!data.complaints.length) {
+    el.innerHTML = '<div style="text-align:center;padding:12px;color:var(--success)">✅ No pending complaints!</div>';
+    return;
+  }
+  el.innerHTML = data.complaints.map(c => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px;border-bottom:1px solid var(--border);font-size:13px">
+      <div>
+        <span class="font-mono" style="color:var(--primary-light)">${c.id}</span>
+        <div style="color:var(--text-muted)">${c.title.substring(0,35)}...</div>
+      </div>
+      <span class="badge badge-${priorityClass(c.priority)}">${c.priority}</span>
+    </div>`).join('');
+}
+
+// Load settings user info
+document.addEventListener('DOMContentLoaded', () => {
+  // Settings page will be populated when user is loaded in app.js
+  setTimeout(() => {
+    if (currentUser) {
+      const fields = { 's-name': currentUser.name, 's-email': currentUser.email, 's-role': currentUser.role, 's-dept': currentUser.department || '—' };
+      Object.entries(fields).forEach(([id, val]) => {
+        const el = document.getElementById(id);
+        if (el) el.value = val;
+      });
+    }
+  }, 500);
+});
+</script>
+</body>
+</html>

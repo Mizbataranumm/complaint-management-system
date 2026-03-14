@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register – College Complaint Management System</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="login-page">
+
+  <div class="login-container" style="max-width:500px">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="login-logo">🏛️</div>
+        <h1>Create Account</h1>
+        <p>ABC Engineering College · ERP Portal</p>
+      </div>
+
+      <div id="error-msg" class="alert alert-error hidden">
+        <span>⚠️</span>
+        <span id="error-text"></span>
+      </div>
+      <div id="success-msg" class="alert alert-success hidden">
+        <span>✅</span>
+        <span id="success-text"></span>
+      </div>
+
+      <div class="login-form">
+
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" id="name" placeholder="Enter your full name">
+        </div>
+
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="text" id="email" placeholder="your@email.com">
+        </div>
+
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="text" id="phone" placeholder="10-digit mobile number">
+        </div>
+
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="password" placeholder="Minimum 6 characters">
+        </div>
+
+        <div class="form-group">
+          <label>Confirm Password</label>
+          <input type="password" id="confirm-password" placeholder="Re-enter your password">
+        </div>
+
+        <div class="form-group">
+          <label>Register As</label>
+          <select id="role">
+            <option value="">Select your role</option>
+            <option value="student">Student</option>
+            <option value="staff">Staff</option>
+            <option value="hod">Head of Department (HOD)</option>
+            <option value="maintenance">Maintenance Staff</option>
+          </select>
+        </div>
+
+        <div class="form-group" id="rollno-group">
+          <label>Roll Number <span style="color:var(--text-muted);font-weight:400">(Students only)</span></label>
+          <input type="text" id="rollno" placeholder="e.g. CS2021001">
+        </div>
+
+        <div class="form-group">
+          <label>Department</label>
+          <select id="department">
+            <option value="">Select department</option>
+            <option>Computer Science</option>
+            <option>Information Technology</option>
+            <option>Electronics</option>
+            <option>Mechanical</option>
+            <option>Civil</option>
+            <option>Electrical</option>
+            <option>Hostel Management</option>
+            <option>Maintenance</option>
+            <option>Administration</option>
+            <option>Library</option>
+          </select>
+        </div>
+
+        <button type="button" class="btn btn-primary btn-full" onclick="doRegister()">
+          📝 Create Account
+        </button>
+
+        <div style="text-align:center;margin-top:16px;font-size:13px;color:var(--text-secondary)">
+          Already have an account?
+          <a href="login.html" style="color:var(--primary-light);font-weight:600">Sign In</a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Show/hide roll number based on role
+    document.getElementById('role').addEventListener('change', function() {
+      var rollGroup = document.getElementById('rollno-group');
+      rollGroup.style.display = this.value === 'student' ? 'flex' : 'none';
+    });
+    document.getElementById('rollno-group').style.display = 'none';
+
+    async function doRegister() {
+      var name     = document.getElementById('name').value.trim();
+      var email    = document.getElementById('email').value.trim();
+      var phone    = document.getElementById('phone').value.trim();
+      var password = document.getElementById('password').value.trim();
+      var confirm  = document.getElementById('confirm-password').value.trim();
+      var role     = document.getElementById('role').value;
+      var dept     = document.getElementById('department').value;
+      var rollno   = document.getElementById('rollno').value.trim();
+
+      var errMsg   = document.getElementById('error-msg');
+      var errText  = document.getElementById('error-text');
+      var sucMsg   = document.getElementById('success-msg');
+      var sucText  = document.getElementById('success-text');
+
+      errMsg.classList.add('hidden');
+      sucMsg.classList.add('hidden');
+
+      // Validations
+      if (!name || name.length < 2) {
+        return showError('Please enter your full name (minimum 2 characters).');
+      }
+      if (!/^[a-zA-Z\s\.]+$/.test(name)) {
+        return showError('Name should contain letters only.');
+      }
+      if (!email || email.indexOf('@') === -1) {
+        return showError('Please enter a valid email address.');
+      }
+      if (!phone || phone.length < 10 || isNaN(phone)) {
+        return showError('Please enter a valid 10-digit phone number.');
+      }
+      if (!password || password.length < 6) {
+        return showError('Password must be at least 6 characters.');
+      }
+      if (password !== confirm) {
+        return showError('Passwords do not match.');
+      }
+      if (!role) {
+        return showError('Please select your role.');
+      }
+      if (!dept) {
+        return showError('Please select your department.');
+      }
+
+      try {
+        var response = await fetch('http://localhost:3000/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: name,
+            email: email,
+            phone: phone,
+            password: password,
+            role: role,
+            department: dept,
+            rollNo: rollno
+          })
+        });
+
+        var data = await response.json();
+
+        if (data.success) {
+          sucText.textContent = 'Account created successfully! Redirecting to login...';
+          sucMsg.classList.remove('hidden');
+          setTimeout(function() {
+            window.location.href = 'http://localhost:3000/login.html';
+          }, 2000);
+        } else {
+          showError(data.message || 'Registration failed. Please try again.');
+        }
+
+      } catch(err) {
+        showError('Cannot connect to server. Make sure node backend/server.js is running.');
+      }
+    }
+
+    function showError(msg) {
+      document.getElementById('error-text').textContent = msg;
+      document.getElementById('error-msg').classList.remove('hidden');
+    }
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') doRegister();
+    });
+  </script>
+
+</body>
+</html>
