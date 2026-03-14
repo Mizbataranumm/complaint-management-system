@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Register – College Complaint Management System</title>
+  <title>Register - College Complaint Management System</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="login-page">
@@ -11,17 +11,17 @@
   <div class="login-container" style="max-width:500px">
     <div class="login-card">
       <div class="login-header">
-        <div class="login-logo">🏛️</div>
+        <div class="login-logo">&#127963;</div>
         <h1>Create Account</h1>
-        <p>ABC Engineering College · ERP Portal</p>
+        <p>ABC Engineering College &middot; ERP Portal</p>
       </div>
 
       <div id="error-msg" class="alert alert-error hidden">
-        <span>⚠️</span>
+        <span>&#9888;</span>
         <span id="error-text"></span>
       </div>
       <div id="success-msg" class="alert alert-success hidden">
-        <span>✅</span>
+        <span>&#10003;</span>
         <span id="success-text"></span>
       </div>
 
@@ -63,8 +63,8 @@
           </select>
         </div>
 
-        <div class="form-group" id="rollno-group">
-          <label>Roll Number <span style="color:var(--text-muted);font-weight:400">(Students only)</span></label>
+        <div class="form-group" id="rollno-group" style="display:none">
+          <label>Roll Number <span style="color:#94a3b8;font-weight:400">(Students only)</span></label>
           <input type="text" id="rollno" placeholder="e.g. CS2021001">
         </div>
 
@@ -86,12 +86,12 @@
         </div>
 
         <button type="button" class="btn btn-primary btn-full" onclick="doRegister()">
-          📝 Create Account
+          Create Account
         </button>
 
-        <div style="text-align:center;margin-top:16px;font-size:13px;color:var(--text-secondary)">
+        <div style="text-align:center;margin-top:16px;font-size:13px;color:#475569;">
           Already have an account?
-          <a href="login.html" style="color:var(--primary-light);font-weight:600">Sign In</a>
+          <a href="login.html" style="color:#3b82f6;font-weight:600;">Sign In</a>
         </div>
 
       </div>
@@ -99,12 +99,15 @@
   </div>
 
   <script>
-    // Show/hide roll number based on role
+    // ── Auto-detect API base URL (works on both localhost AND Render) ──
+    var API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+      ? 'http://localhost:3000'
+      : window.location.origin;
+
+    // Show/hide roll number field for students only
     document.getElementById('role').addEventListener('change', function() {
-      var rollGroup = document.getElementById('rollno-group');
-      rollGroup.style.display = this.value === 'student' ? 'flex' : 'none';
+      document.getElementById('rollno-group').style.display = this.value === 'student' ? 'flex' : 'none';
     });
-    document.getElementById('rollno-group').style.display = 'none';
 
     async function doRegister() {
       var name     = document.getElementById('name').value.trim();
@@ -116,53 +119,33 @@
       var dept     = document.getElementById('department').value;
       var rollno   = document.getElementById('rollno').value.trim();
 
-      var errMsg   = document.getElementById('error-msg');
-      var errText  = document.getElementById('error-text');
-      var sucMsg   = document.getElementById('success-msg');
-      var sucText  = document.getElementById('success-text');
+      var errMsg = document.getElementById('error-msg');
+      var errText = document.getElementById('error-text');
+      var sucMsg  = document.getElementById('success-msg');
+      var sucText = document.getElementById('success-text');
 
       errMsg.classList.add('hidden');
       sucMsg.classList.add('hidden');
 
       // Validations
-      if (!name || name.length < 2) {
-        return showError('Please enter your full name (minimum 2 characters).');
-      }
-      if (!/^[a-zA-Z\s\.]+$/.test(name)) {
-        return showError('Name should contain letters only.');
-      }
-      if (!email || email.indexOf('@') === -1) {
-        return showError('Please enter a valid email address.');
-      }
-      if (!phone || phone.length < 10 || isNaN(phone)) {
-        return showError('Please enter a valid 10-digit phone number.');
-      }
-      if (!password || password.length < 6) {
-        return showError('Password must be at least 6 characters.');
-      }
-      if (password !== confirm) {
-        return showError('Passwords do not match.');
-      }
-      if (!role) {
-        return showError('Please select your role.');
-      }
-      if (!dept) {
-        return showError('Please select your department.');
-      }
+      if (!name || name.length < 2)              return showError('Please enter your full name.');
+      if (!/^[a-zA-Z\s\.]+$/.test(name))         return showError('Name should contain letters only.');
+      if (!email || email.indexOf('@') === -1)    return showError('Please enter a valid email address.');
+      if (!phone || phone.length < 10 || isNaN(phone)) return showError('Please enter a valid 10-digit phone number.');
+      if (!password || password.length < 6)       return showError('Password must be at least 6 characters.');
+      if (password !== confirm)                   return showError('Passwords do not match.');
+      if (!role)                                  return showError('Please select your role.');
+      if (!dept)                                  return showError('Please select your department.');
+
+      var btn = document.querySelector('button');
+      btn.textContent = 'Creating account...';
+      btn.disabled = true;
 
       try {
-        var response = await fetch('http://localhost:3000/api/register', {
+        var response = await fetch(API_BASE + '/api/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name: name,
-            email: email,
-            phone: phone,
-            password: password,
-            role: role,
-            department: dept,
-            rollNo: rollno
-          })
+          body: JSON.stringify({ name, email, phone, password, role, department: dept, rollNo: rollno })
         });
 
         var data = await response.json();
@@ -171,14 +154,18 @@
           sucText.textContent = 'Account created successfully! Redirecting to login...';
           sucMsg.classList.remove('hidden');
           setTimeout(function() {
-            window.location.href = 'http://localhost:3000/login.html';
+            window.location.href = API_BASE + '/login.html';
           }, 2000);
         } else {
           showError(data.message || 'Registration failed. Please try again.');
+          btn.textContent = 'Create Account';
+          btn.disabled = false;
         }
 
       } catch(err) {
-        showError('Cannot connect to server. Make sure node backend/server.js is running.');
+        showError('Cannot connect to server. Please try again.');
+        btn.textContent = 'Create Account';
+        btn.disabled = false;
       }
     }
 
