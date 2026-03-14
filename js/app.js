@@ -26,7 +26,7 @@ function logout() {
 // ─── API Helpers ─────────────────────────────────────────────────────
 async function apiFetch(endpoint, opts = {}) {
   try {
-    const res = await fetch(API + endpoint, {
+    const res = await fetch(API_BASE + endpoint, {
       headers: { 'Content-Type': 'application/json', ...opts.headers },
       ...opts
     });
@@ -258,7 +258,7 @@ async function submitComplaint(e) {
   formData.set('userRole', currentUser.role);
 
   try {
-    const res = await fetch(API + '/complaints', {
+    const res = await fetch(API_BASE + '/complaints', {
       method: 'POST',
       body: formData
     });
