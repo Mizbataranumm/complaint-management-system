@@ -1,6 +1,7 @@
 // js/app.js - Core Application Logic
 
-const API_BASE = "https://complaint-api-ukmi.onrender.com";
+const isRender = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+const API = isRender ? window.location.origin + '/api' : 'http://localhost:3000/api';
 let currentUser = null;
 let allComplaints = [];
 let currentPage = 1;
@@ -26,7 +27,7 @@ function logout() {
 // ─── API Helpers ─────────────────────────────────────────────────────
 async function apiFetch(endpoint, opts = {}) {
   try {
-    const res = await fetch(API_BASE + endpoint, {
+    const res = await fetch(API + endpoint, {
       headers: { 'Content-Type': 'application/json', ...opts.headers },
       ...opts
     });
@@ -258,7 +259,7 @@ async function submitComplaint(e) {
   formData.set('userRole', currentUser.role);
 
   try {
-    const res = await fetch(API_BASE + '/complaints', {
+    const res = await fetch(API + '/complaints', {
       method: 'POST',
       body: formData
     });

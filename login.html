@@ -1,82 +1,165 @@
-<script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - College Complaint Management System</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="login-page">
 
-const API_BASE = "https://complaint-api-ukmi.onrender.com";
+  <div class="login-container">
+    <div class="login-card">
 
-async function doLogin() {
-  var email    = document.getElementById('email').value.trim();
-  var password = document.getElementById('password').value.trim();
-  var role     = document.getElementById('role').value;
-  var btn      = document.getElementById('login-btn');
-  var errMsg   = document.getElementById('error-msg');
-  var errText  = document.getElementById('error-text');
+      <div class="login-header">
+        <div class="login-logo">&#127963;</div>
+        <h1>College Complaint<br>Management System</h1>
+        <p>ABC Engineering College &middot; ERP Portal</p>
+      </div>
 
-  errMsg.classList.add('hidden');
+      <div id="error-msg" class="alert alert-error hidden">
+        <span>&#9888;</span>
+        <span id="error-text">Invalid email or password. Please try again.</span>
+      </div>
 
-  if (!email || email.indexOf('@') === -1) {
-    errText.textContent = 'Please enter a valid email address.';
-    errMsg.classList.remove('hidden');
-    return;
-  }
+      <div class="login-form">
 
-  if (!password) {
-    errText.textContent = 'Password is required.';
-    errMsg.classList.remove('hidden');
-    return;
-  }
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="text" id="reg-email" placeholder="your@college.edu" autocomplete="off">
+        </div>
 
-  if (!role) {
-    errText.textContent = 'Please select your role.';
-    errMsg.classList.remove('hidden');
-    return;
-  }
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="reg-pass" placeholder="Enter your password">
+        </div>
 
-  btn.textContent = 'Signing in...';
-  btn.disabled = true;
+        <div class="form-group">
+          <label>Login As</label>
+          <select id="reg-role">
+            <option value="">-- Select your role --</option>
+            <option value="student">Student</option>
+            <option value="staff">Staff</option>
+            <option value="hod">Head of Department (HOD)</option>
+            <option value="admin">Complaint Admin</option>
+            <option value="maintenance">Maintenance Staff</option>
+          </select>
+        </div>
 
-  try {
+        <button type="button" class="btn btn-primary btn-full" id="login-btn" onclick="doLogin()">
+          &#128272; Sign In
+        </button>
 
-    var response = await fetch(API_BASE + "/api/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email: email,
-        password: password,
-        role: role
-      })
+        <div style="text-align:center;margin-top:16px;font-size:13px;color:#475569;">
+          No account? 
+          <a href="register.html" style="color:#3b82f6;font-weight:600;">Create Account</a>
+        </div>
+
+      </div>
+
+      <div class="demo-info">
+        <strong>&#129514; Demo Credentials</strong>
+        <div id="demo-creds" style="display:flex;flex-direction:column;gap:6px;margin-top:8px;font-size:12px;"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // Build demo credentials via JS so Cloudflare cannot scramble them
+    var creds = [
+      { role: 'Admin',    u: 'admin',      p: 'Admin@123'   },
+      { role: 'Student',  u: 'student',    p: 'Student@123' },
+      { role: 'HOD',      u: 'hod',        p: 'Hod@123'     },
+      { role: 'Staff',    u: 'staff',      p: 'Staff@123'   }
+    ];
+    var domain = 'college.edu';
+    var container = document.getElementById('demo-creds');
+    creds.forEach(function(c) {
+      var email = c.u + '@' + domain;
+      var div = document.createElement('div');
+      div.innerHTML = '<strong>' + c.role + ':</strong> ' + email + ' / ' + c.p;
+      div.style.cursor = 'pointer';
+      div.title = 'Click to fill';
+      div.onclick = function() {
+        document.getElementById('reg-email').value = email;
+        document.getElementById('reg-pass').value = c.p;
+        // auto-select role
+        var sel = document.getElementById('reg-role');
+        for (var i = 0; i < sel.options.length; i++) {
+          if (sel.options[i].value === c.u || 
+             (c.u === 'admin' && sel.options[i].value === 'admin') ||
+             (c.u === 'hod'   && sel.options[i].value === 'hod')) {
+            sel.selectedIndex = i; break;
+          }
+          if (sel.options[i].text.toLowerCase().includes(c.u)) {
+            sel.selectedIndex = i; break;
+          }
+        }
+      };
+      container.appendChild(div);
     });
 
-    var data = await response.json();
+    // Detect if running on Render or localhost
+    var isRender = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+    var API_BASE  = isRender ? window.location.origin : 'http://localhost:3000';
 
-    if (data.success) {
+    async function doLogin() {
+      var email    = document.getElementById('reg-email').value.trim();
+      var password = document.getElementById('reg-pass').value.trim();
+      var role     = document.getElementById('reg-role').value;
+      var btn      = document.getElementById('login-btn');
+      var errMsg   = document.getElementById('error-msg');
+      var errText  = document.getElementById('error-text');
 
-      sessionStorage.setItem("cms_user", JSON.stringify(data.user));
+      errMsg.classList.add('hidden');
 
-      // Redirect to dashboard
-      window.location.href = "dashboard.html";
+      if (!email || email.indexOf('@') === -1) {
+        errText.textContent = 'Please enter a valid email address.';
+        errMsg.classList.remove('hidden'); return;
+      }
+      if (!password) {
+        errText.textContent = 'Password is required.';
+        errMsg.classList.remove('hidden'); return;
+      }
+      if (!role) {
+        errText.textContent = 'Please select your role.';
+        errMsg.classList.remove('hidden'); return;
+      }
 
-    } else {
+      btn.textContent = 'Signing in...';
+      btn.disabled = true;
 
-      errText.textContent = data.message || "Invalid login.";
-      errMsg.classList.remove("hidden");
+      try {
+        var res = await fetch(API_BASE + '/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email, password: password, role: role })
+        });
+        var data = await res.json();
 
-      btn.textContent = "🔐 Sign In";
-      btn.disabled = false;
-
+        if (data.success) {
+          sessionStorage.setItem('cms_user', JSON.stringify(data.user));
+          window.location.href = API_BASE + '/dashboard.html';
+        } else {
+          errText.textContent = data.message || 'Invalid email or password. Please try again.';
+          errMsg.classList.remove('hidden');
+          btn.textContent = 'Sign In';
+          btn.disabled = false;
+        }
+      } catch (err) {
+        errText.textContent = 'Cannot connect to server. Make sure the server is running.';
+        errMsg.classList.remove('hidden');
+        btn.textContent = 'Sign In';
+        btn.disabled = false;
+      }
     }
 
-  } catch (err) {
+    // Press Enter to login
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') doLogin();
+    });
+  </script>
 
-    errText.textContent = "Cannot connect to server.";
-    errMsg.classList.remove("hidden");
-
-    btn.textContent = "🔐 Sign In";
-    btn.disabled = false;
-
-  }
-}
-
-document.addEventListener("keydown", function(e){
-  if(e.key === "Enter") doLogin();
-});
-
-</script>
+</body>
+</html>
